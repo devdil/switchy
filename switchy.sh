@@ -12,17 +12,18 @@ log(){
 }
 
 
-
+# Logs the error message for unsupported OS.
 unsupported_type()
 {
   log "ERROR" "Unsupported OS Type! Supported OSTYPE: MacOSx.";
   exit 1;
 }
 
+
 handle_macos()
 {
   log "INFO" "Dectected Operating System: ${OS}"
-  list_all_wifi_types
+  configure_and_start
   exit 0;
 }
 
@@ -40,10 +41,10 @@ monitor_and_switch_wifi()
   do
     #loop infintely
     log "INFO" "🌏 Pinging the Internet"
-    if ping -c 10 -W 1000 -q 8.8.8.8 >&/dev/null;then
+    if ping -i .5  -t 3 google.com >&/dev/null;then
         log "INFO" "✅ Ping 8.8.8.8 Successfull ✅"
       else
-        echo "ERROR" "Ping 8.8.8.8 Failed 🥺"
+        log "ERROR" "Ping 8.8.8.8 Failed 🥺"
         FAILURES_TILL_NOW=$((FAILURES_TILL_NOW+1))
         if [ "$FAILURES_TILL_NOW" -gt "$MAX_FAILURES_TOLERABLE" ];then
             log "INFO" "Resetting to normal values"
@@ -51,12 +52,14 @@ monitor_and_switch_wifi()
             log "INFO" "Switching to healthy wifi..."
             SWITCH_TO_SECONDARY="networksetup -setairportnetwork en0 $secondarywifissid $secondarywifissidpassword"
             eval $SWITCH_TO_SECONDARY
-            if [ $status -eq 0 ];then
+            if [ $? -eq 0 ];then
               log "INFO" "✅ Successfullly switched to secondary"
             else
               log "ERROR" "🥺 Could not switch to secondary wifi"
               exit 1
             fi
+        else
+          log "INFO" "Failures $FAILURES_TILL_NOW/$MAX_FAILURES_TOLERABLE"
         fi 
     fi      
     log "INFO" "😴 Sleeping for 3 seconds"    
@@ -81,7 +84,7 @@ is_configured(){
 }
 
 
-list_all_wifi_types(){
+configure_and_start(){
 
     if is_configured; then
       primarywifissid=`grep -w primarywifissid ./switchy.conf | cut -d'=' -f2`
