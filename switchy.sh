@@ -22,7 +22,7 @@ unsupported_type()
 
 handle_macos()
 {
-  log "INFO" "Dectected Operating System: ${OS}"
+  log "INFO" "Detected Operating System: ${OS}"
   configure_and_start
   exit 0;
 }
@@ -53,7 +53,7 @@ monitor_and_switch_wifi()
             SWITCH_TO_SECONDARY="networksetup -setairportnetwork en0 $secondarywifissid $secondarywifissidpassword"
             eval $SWITCH_TO_SECONDARY
             if [ $? -eq 0 ];then
-              log "INFO" "✅ Successfullly switched to secondary"
+              log "INFO" "✅ Successfully switched to secondary"
             else
               log "ERROR" "🥺 Could not switch to secondary wifi"
               exit 1
