@@ -1,4 +1,5 @@
-# switchy
+# [switch](https://user-images.githubusercontent.com/5098875/180658396-7aab247c-34ff-428d-b2d8-a6ac4dc59b69.png)
+# switchy!
 An automated tool to fail over to healthy WIFI on macos.
 All you need to do is to let switchy know about the wifis you are interested in
 and switch does the hardwork to switch over to a secondary wifi if the primary
