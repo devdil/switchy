@@ -109,12 +109,16 @@ configure_and_start(){
       eval $COMMAND
       echo "------- Enter your Primary WIFI details -----------------"
       read -p 'Primary WIFI SSID: ' primarywifissid
+      stty -echo
       read -s -p 'Primary WIFI Password: ' primarywifissidpassword
+      stty echo
       log "INFO" "Your Primary WIFI SSID is ${primarywifissid}"
       echo "-----------------------------------------------------------"
       echo "------- Enter your Secondary/Fallback WIFI details -------"
       read -p 'Fallback WIFI SSID: ' secondarywifissid
-      read -s -p 'Fallback WIFI Password: ', secondarywifissidpassword
+      stty -echo
+      read -s -p 'Fallback WIFI Password: ' secondarywifissidpassword
+      stty echo
       log "INFO" "Your Secondary/Fallback WIFI SSID is ${secondarywifissid}"
       echo "-----------------------------------------------------------"
       echo "✅ Saving configurations to ./switchy.conf"
