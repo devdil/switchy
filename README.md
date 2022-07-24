@@ -1,4 +1,5 @@
-![switch](https://user-images.githubusercontent.com/5098875/180658396-7aab247c-34ff-428d-b2d8-a6ac4dc59b69.png)
+<img width="325" alt="Screenshot 2022-07-24 at 10 40 42 PM" src="https://user-images.githubusercontent.com/5098875/180658488-2f7cffab-e805-40c0-a555-106f934db0a0.png">
+
 # switchy
 An automated tool to fail over to healthy WIFI on macos.
 All you need to do is to let switchy know about the wifis you are interested in
