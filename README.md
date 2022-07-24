@@ -12,7 +12,11 @@ Open your terminal and type the following
 
 ```console
 curl https://raw.githubusercontent.com/devdil/switchy/main/switchy.sh --output switchy.sh
+```
+```console
 chmod +x ./switchy.sh
+```
+```console
 ./switchy.sh
 ```
 
