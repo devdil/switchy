@@ -1,9 +1,10 @@
 #!/bin/bash
 
-
-# Define common functions here.
-
-log(){
+: '
+  Display the incoming logs with timestamp on terminal and save the same on switch.log file
+'
+log()
+{
   LEVEL=$1
   TIMESTAMP=`date "+%Y-%m-%d %H:%M:%S"`
   MESSAGE=$2
@@ -11,15 +12,18 @@ log(){
   echo "$TIMESTAMP $LEVEL $MESSAGE" >> ./switch.log
 }
 
-
-# Logs the error message for unsupported OS.
+: '
+  Display error message for unsupported OS. Current version supports Mac OS X only.
+'
 unsupported_type()
 {
   log "ERROR" "Unsupported OS Type! Supported OSTYPE: MacOSx.";
   exit 1;
 }
 
-
+: '
+  Display detected operating system and initialize script configuration and execution 
+'
 handle_macos()
 {
   log "INFO" "Detected Operating System: ${OS}"
@@ -27,6 +31,9 @@ handle_macos()
   exit 0;
 }
 
+: '
+  Monitor primary wifi and switch over to fallback wifi in case of primary wifi goes down
+'
 monitor_and_switch_wifi()
 {
   primarywifissid=$1
@@ -68,7 +75,11 @@ monitor_and_switch_wifi()
 
 }
 
-is_configured(){
+: '
+  Verify wifi configuration existing
+'
+is_configured()
+{
   if [ ! -f ./switchy.conf ]; then
     return 1
   else
@@ -83,79 +94,82 @@ is_configured(){
   fi
 }
 
-
-configure_and_start(){
-
-    if is_configured; then
-      primarywifissid=`grep -w primarywifissid ./switchy.conf | cut -d'=' -f2`
-      primarywifissidpassword=`grep -w primarywifissidpassword ./switchy.conf | cut -d'=' -f2`
-      secondarywifissid=`grep -w secondarywifissid ./switchy.conf | cut -d'=' -f2`
-      secondarywifissidpassword=`grep -w secondarywifissidpassword ./switchy.conf | cut -d'=' -f2`
-      wifiinterface=`grep -w wifiinterface ./switchy.conf | cut -d'=' -f2`
-      log "INFO" "PrimaryWIFi: $primarywifissid SecondaryWIFI: $secondarywifissid WifiInterface: $wifiinterface"
-      monitor_and_switch_wifi $primarywifissid $primarywifissidpassword $secondarywifissid $secondarywifissidpassword $wifiinterface
+: '
+  Load either existing configuration if exist else create new and start the script execution
+'
+configure_and_start()
+{
+  if is_configured; then
+    primarywifissid=`grep -w primarywifissid ./switchy.conf | cut -d'=' -f2`
+    primarywifissidpassword=`grep -w primarywifissidpassword ./switchy.conf | cut -d'=' -f2`
+    secondarywifissid=`grep -w secondarywifissid ./switchy.conf | cut -d'=' -f2`
+    secondarywifissidpassword=`grep -w secondarywifissidpassword ./switchy.conf | cut -d'=' -f2`
+    wifiinterface=`grep -w wifiinterface ./switchy.conf | cut -d'=' -f2`
+    log "INFO" "PrimaryWIFi: $primarywifissid SecondaryWIFI: $secondarywifissid WifiInterface: $wifiinterface"
+    monitor_and_switch_wifi $primarywifissid $primarywifissidpassword $secondarywifissid $secondarywifissidpassword $wifiinterface
+  else
+    log INFO "Searching and Configuring WIFI Port..."
+    WIFI_PORT=`networksetup -listallhardwareports -h | grep -A 2  'Wi-Fi' | grep Device | cut -d ' ' -f2`
+    if [ -z "$WIFI_PORT" ]; then
+      log "ERROR" "Could not search and configure a valid WIFI port :("
+      exit 1
     else
-      log INFO "Searching and Configuring WIFI Port..."
-      WIFI_PORT=`networksetup -listallhardwareports -h | grep -A 2  'Wi-Fi' | grep Device | cut -d ' ' -f2`
-      if [ -z "$WIFI_PORT" ]; then
-        log "ERROR" "Could not search and configure a valid WIFI port :("
-        exit 1
-      else
-        log "INFO" "✅ Found WIFI Hardware port on ${WIFI_PORT} "
-      fi
-
-      log "INFO" "Listing all Wifi adapaters..."
-      COMMAND="/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport -s"
-      eval $COMMAND
-      echo "------- Enter your Primary WIFI details -----------------"
-      read -p 'Primary WIFI SSID: ' primarywifissid
-      stty -echo
-      read -s -p 'Primary WIFI Password: ' primarywifissidpassword
-      stty echo
-      log "INFO" "Your Primary WIFI SSID is ${primarywifissid}"
-      echo "-----------------------------------------------------------"
-      echo "------- Enter your Secondary/Fallback WIFI details -------"
-      read -p 'Fallback WIFI SSID: ' secondarywifissid
-      stty -echo
-      read -s -p 'Fallback WIFI Password: ' secondarywifissidpassword
-      stty echo
-      log "INFO" "Your Secondary/Fallback WIFI SSID is ${secondarywifissid}"
-      echo "-----------------------------------------------------------"
-      echo "✅ Saving configurations to ./switchy.conf"
-      echo "configured=true" > ./switchy.conf
-      echo "primarywifissid=${primarywifissid}" >> ./switchy.conf
-      echo "primarywifissidpassword=${primarywifissidpassword}" >> ./switchy.conf
-      echo "secondarywifissid=${secondarywifissid}" >> ./switchy.conf
-      echo "secondarywifissidpassword=${secondarywifissidpassword}" >> ./switchy.conf
-      echo "wifiinterface=${WIFI_PORT}" >> ./switchy.conf
-      echo "✅ Saved configurations to ./switchy.conf"
-      monitor_and_switch_wifi $primarywifissid $primarywifissidpassword $secondarywifissid $secondarywifissidpassword $wifiinterface
+      log "INFO" "✅ Found WIFI Hardware port on ${WIFI_PORT} "
     fi
+
+    log "INFO" "Listing all Wifi adapaters..."
+    COMMAND="/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport -s"
+    eval $COMMAND
+    echo "------- Enter your Primary WIFI details -----------------"
+    read -p 'Primary WIFI SSID: ' primarywifissid
+    stty -echo
+    read -s -p 'Primary WIFI Password: ' primarywifissidpassword
+    stty echo
+    log "INFO" "Your Primary WIFI SSID is ${primarywifissid}"
+    echo "-----------------------------------------------------------"
+    echo "------- Enter your Secondary/Fallback WIFI details -------"
+    read -p 'Fallback WIFI SSID: ' secondarywifissid
+    stty -echo
+    read -s -p 'Fallback WIFI Password: ' secondarywifissidpassword
+    stty echo
+    log "INFO" "Your Secondary/Fallback WIFI SSID is ${secondarywifissid}"
+    echo "-----------------------------------------------------------"
+    echo "✅ Saving configurations to ./switchy.conf"
+    echo "configured=true" > ./switchy.conf
+    echo "primarywifissid=${primarywifissid}" >> ./switchy.conf
+    echo "primarywifissidpassword=${primarywifissidpassword}" >> ./switchy.conf
+    echo "secondarywifissid=${secondarywifissid}" >> ./switchy.conf
+    echo "secondarywifissidpassword=${secondarywifissidpassword}" >> ./switchy.conf
+    echo "wifiinterface=${WIFI_PORT}" >> ./switchy.conf
+    echo "✅ Saved configurations to ./switchy.conf"
+    monitor_and_switch_wifi $primarywifissid $primarywifissidpassword $secondarywifissid $secondarywifissidpassword $wifiinterface
+  fi
 }
 
-# Detect Operating System Type.
-
+: '
+  Detect OS type
+'
 case "$OSTYPE" in
   solaris*)
-   OS="SOLARIS";
-   unsupported_type
-   ;;
+    OS="SOLARIS";
+    unsupported_type
+    ;;
   darwin*)
     OS="OSX" 
     handle_macos;
     ;; 
   linux*)
-     OS="LINUX"
-     unsupported_type
-     ;;
+    OS="LINUX"
+    unsupported_type
+    ;;
   bsd*)
-      OS="BSD"
-      unsupported_type
-      ;;
+    OS="BSD"
+    unsupported_type
+    ;;
   msys*)
-      OS="WINDOWS"
-      unsupported_type
-      ;;
+    OS="WINDOWS"
+    unsupported_type
+    ;;
   cygwin*)
     OS="ALSO WINDOWS"
     unsupported_type
