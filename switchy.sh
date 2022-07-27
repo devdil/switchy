@@ -38,8 +38,8 @@ monitor_and_switch_wifi()
 {
   primarywifissid=$1
   primarywifissidpassword=$2
-  secondarywifissid=$3
-  secondarywifissidpassword=$4
+  fallbackwifissid=$3
+  fallbackwifissidpassword=$4
   wifiinterface=$5
   MAX_FAILURES_TOLERABLE=3
   FAILURES_TILL_NOW=0
@@ -57,12 +57,12 @@ monitor_and_switch_wifi()
             log "INFO" "Resetting to normal values"
             FAILURES_TILL_NOW=0
             log "INFO" "Switching to healthy wifi..."
-            SWITCH_TO_SECONDARY="networksetup -setairportnetwork en0 $secondarywifissid $secondarywifissidpassword"
-            eval $SWITCH_TO_SECONDARY
+            SWITCH_TO_FALLBACK="networksetup -setairportnetwork en0 $fallbackwifissid $fallbackwifissidpassword"
+            eval $SWITCH_TO_FALLBACK
             if [ $? -eq 0 ];then
-              log "INFO" "✅ Successfully switched to secondary"
+              log "INFO" "✅ Successfully switched to fallback"
             else
-              log "ERROR" "🥺 Could not switch to secondary wifi"
+              log "ERROR" "🥺 Could not switch to fallback wifi"
               exit 1
             fi
         else
@@ -102,11 +102,11 @@ configure_and_start()
   if is_configured; then
     primarywifissid=`grep -w primarywifissid ./switchy.conf | cut -d'=' -f2`
     primarywifissidpassword=`grep -w primarywifissidpassword ./switchy.conf | cut -d'=' -f2`
-    secondarywifissid=`grep -w secondarywifissid ./switchy.conf | cut -d'=' -f2`
-    secondarywifissidpassword=`grep -w secondarywifissidpassword ./switchy.conf | cut -d'=' -f2`
+    fallbackwifissid=`grep -w fallbackwifissid ./switchy.conf | cut -d'=' -f2`
+    fallbackwifissidpassword=`grep -w fallbackwifissidpassword ./switchy.conf | cut -d'=' -f2`
     wifiinterface=`grep -w wifiinterface ./switchy.conf | cut -d'=' -f2`
-    log "INFO" "PrimaryWIFi: $primarywifissid SecondaryWIFI: $secondarywifissid WifiInterface: $wifiinterface"
-    monitor_and_switch_wifi $primarywifissid $primarywifissidpassword $secondarywifissid $secondarywifissidpassword $wifiinterface
+    log "INFO" "Primary WiFi: $primarywifissid Fallback WiFi: $fallbackwifissid WifiInterface: $wifiinterface"
+    monitor_and_switch_wifi $primarywifissid $primarywifissidpassword $fallbackwifissid $fallbackwifissidpassword $wifiinterface
   else
     log INFO "Searching and Configuring WIFI Port..."
     WIFI_PORT=`networksetup -listallhardwareports -h | grep -A 2  'Wi-Fi' | grep Device | cut -d ' ' -f2`
@@ -127,22 +127,22 @@ configure_and_start()
     stty echo
     log "INFO" "Your Primary WIFI SSID is ${primarywifissid}"
     echo "-----------------------------------------------------------"
-    echo "------- Enter your Secondary/Fallback WIFI details -------"
-    read -p 'Fallback WIFI SSID: ' secondarywifissid
+    echo "------- Enter your Fallback WIFI details -------"
+    read -p 'Fallback WIFI SSID: ' fallbackwifissid
     stty -echo
-    read -s -p 'Fallback WIFI Password: ' secondarywifissidpassword
+    read -s -p 'Fallback WIFI Password: ' fallbackwifissidpassword
     stty echo
-    log "INFO" "Your Secondary/Fallback WIFI SSID is ${secondarywifissid}"
+    log "INFO" "Your Fallback WIFI SSID is ${fallbackwifissid}"
     echo "-----------------------------------------------------------"
     echo "✅ Saving configurations to ./switchy.conf"
     echo "configured=true" > ./switchy.conf
     echo "primarywifissid=${primarywifissid}" >> ./switchy.conf
     echo "primarywifissidpassword=${primarywifissidpassword}" >> ./switchy.conf
-    echo "secondarywifissid=${secondarywifissid}" >> ./switchy.conf
-    echo "secondarywifissidpassword=${secondarywifissidpassword}" >> ./switchy.conf
+    echo "fallbackwifissid=${fallbackwifissid}" >> ./switchy.conf
+    echo "fallbackwifissidpassword=${fallbackwifissidpassword}" >> ./switchy.conf
     echo "wifiinterface=${WIFI_PORT}" >> ./switchy.conf
     echo "✅ Saved configurations to ./switchy.conf"
-    monitor_and_switch_wifi $primarywifissid $primarywifissidpassword $secondarywifissid $secondarywifissidpassword $wifiinterface
+    monitor_and_switch_wifi $primarywifissid $primarywifissidpassword $fallbackwifissid $fallbackwifissidpassword $wifiinterface
   fi
 }
 
