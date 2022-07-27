@@ -108,31 +108,31 @@ configure_and_start()
     log "INFO" "Primary WiFi: $primarywifissid Fallback WiFi: $fallbackwifissid WifiInterface: $wifiinterface"
     monitor_and_switch_wifi $primarywifissid $primarywifissidpassword $fallbackwifissid $fallbackwifissidpassword $wifiinterface
   else
-    log INFO "Searching and Configuring WIFI Port..."
+    log INFO "Searching and configure wifi port..."
     WIFI_PORT=`networksetup -listallhardwareports -h | grep -A 2  'Wi-Fi' | grep Device | cut -d ' ' -f2`
     if [ -z "$WIFI_PORT" ]; then
-      log "ERROR" "Could not search and configure a valid WIFI port :("
+      log "ERROR" "Could not search and configure a valid wifi port :("
       exit 1
     else
-      log "INFO" "✅ Found WIFI Hardware port on ${WIFI_PORT} "
+      log "INFO" "✅ Found wifi hardware port on ${WIFI_PORT} "
     fi
 
-    log "INFO" "Listing all Wifi adapaters..."
+    log "INFO" "Listing all wifi adapaters..."
     COMMAND="/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport -s"
     eval $COMMAND
-    echo "------- Enter your Primary WIFI details -----------------"
-    read -p 'Primary WIFI SSID: ' primarywifissid
+    echo "------- Enter your primary wifi details -----------------"
+    read -p 'Primary wifi SSID: ' primarywifissid
     stty -echo
-    read -s -p 'Primary WIFI Password: ' primarywifissidpassword
+    read -s -p 'Primary wifi password: ' primarywifissidpassword
     stty echo
-    log "INFO" "Your Primary WIFI SSID is ${primarywifissid}"
+    log "INFO" "Your Primary wifi SSID is ${primarywifissid}"
     echo "-----------------------------------------------------------"
-    echo "------- Enter your Fallback WIFI details -------"
-    read -p 'Fallback WIFI SSID: ' fallbackwifissid
+    echo "------- Enter your fallback WIFI details -------"
+    read -p 'Fallback wifi SSID: ' fallbackwifissid
     stty -echo
-    read -s -p 'Fallback WIFI Password: ' fallbackwifissidpassword
+    read -s -p 'Fallback wifi password: ' fallbackwifissidpassword
     stty echo
-    log "INFO" "Your Fallback WIFI SSID is ${fallbackwifissid}"
+    log "INFO" "Your Fallback wifi SSID is ${fallbackwifissid}"
     echo "-----------------------------------------------------------"
     echo "✅ Saving configurations to ./switchy.conf"
     echo "configured=true" > ./switchy.conf
