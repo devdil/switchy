@@ -101,9 +101,9 @@ configure_and_start()
 {
   if is_configured; then
     primarywifissid=`grep -w primarywifissid ./switchy.conf | cut -d'=' -f2`
-    primarywifissidpassword=`grep -w primarywifissidpassword ./switchy.conf | cut -d'=' -f2`
+    primarywifissidpassword=`security find-generic-password -s "PRIMARY_WIFI_SSID" -a "${primarywifissid}" -w`
     fallbackwifissid=`grep -w fallbackwifissid ./switchy.conf | cut -d'=' -f2`
-    fallbackwifissidpassword=`grep -w fallbackwifissidpassword ./switchy.conf | cut -d'=' -f2`
+    fallbackwifissidpassword=`security find-generic-password -s "FALLBACK_WIFI_SSID" -a "${fallbackwifissid}" -w`
     wifiinterface=`grep -w wifiinterface ./switchy.conf | cut -d'=' -f2`
     log "INFO" "Primary WiFi: $primarywifissid Fallback WiFi: $fallbackwifissid WifiInterface: $wifiinterface"
     monitor_and_switch_wifi $primarywifissid $primarywifissidpassword $fallbackwifissid $fallbackwifissidpassword $wifiinterface
@@ -134,12 +134,19 @@ configure_and_start()
     stty echo
     log "INFO" "Your Fallback wifi SSID is ${fallbackwifissid}"
     echo "-----------------------------------------------------------"
-    echo "✅ Saving configurations to ./switchy.conf"
+
+    : '
+      By default, use Keychain Access to store critical information
+    '
+    `security add-generic-password -s "PRIMARY_WIFI_SSID" -a "${primarywifissid}" -p "${primarywifissidpassword}"`
+    `security add-generic-password -s "FALLBACK_WIFI_SSID" -a "${fallbackwifissid}" -p "${fallbackwifissidpassword}"`
+
+    : '
+      Save configurations in configuration file
+    '
     echo "configured=true" > ./switchy.conf
     echo "primarywifissid=${primarywifissid}" >> ./switchy.conf
-    echo "primarywifissidpassword=${primarywifissidpassword}" >> ./switchy.conf
     echo "fallbackwifissid=${fallbackwifissid}" >> ./switchy.conf
-    echo "fallbackwifissidpassword=${fallbackwifissidpassword}" >> ./switchy.conf
     echo "wifiinterface=${WIFI_PORT}" >> ./switchy.conf
     echo "✅ Saved configurations to ./switchy.conf"
     monitor_and_switch_wifi $primarywifissid $primarywifissidpassword $fallbackwifissid $fallbackwifissidpassword $wifiinterface
