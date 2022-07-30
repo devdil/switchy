@@ -50,6 +50,7 @@ monitor_and_switch_wifi()
     log "INFO" "🌏 Pinging the Internet"
     if ping -i .5  -t 3 google.com >&/dev/null;then
         log "INFO" "✅ Ping 8.8.8.8 Successfull ✅"
+        FAILURES_TILL_NOW=0
       else
         log "ERROR" "Ping 8.8.8.8 Failed 🥺"
         FAILURES_TILL_NOW=$((FAILURES_TILL_NOW+1))
